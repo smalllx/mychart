@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>line chart</title>
+    <style>
+        canvas{
+            border: 1px solid #ccc;
+            margin: 100px auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas width="600" height="400"></canvas>
+    <script>
+        var data=[
+            {
+                x:0,
+                y:0
+            },
+            {
+                x:100,
+                y:40
+            },
+            {
+                x:200,
+                y:220
+            },{
+                x:300,
+                y:120
+            },{
+                x:400,
+                y:300
+            },{
+                x:500,
+                y:350
+        }];
+        var LineChart = function (ctx) {
+            this.ctx=ctx||document.querySelector('canvas').getContext('2d');
+            this.canvasW =this.ctx.canvas.width;
+            this.canvasH =this.ctx.canvas.height;
+            this.space=10;
+            this.numx=Math.floor(this.canvasW/this.space);
+            this.numy=Math.floor(this.canvasH/this.space);
+
+        };
+        LineChart.prototype.init=function (data) {
+            this.grid();
+            this.coord();
+            this.transformxy(data);
+        };
+        //绘制网格
+        LineChart.prototype.grid=function () {
+//            绘制x方向
+            for (var i=0;i<this.numy;i++){
+                this.ctx.beginPath();
+                this.ctx.moveTo(0,i*this.space-0.5);
+                this.ctx.lineTo(this.canvasW-0.5,i*this.space-0.5);
+                this.ctx.strokeStyle="#ddd";
+                this.ctx.stroke();
+            }
+            //绘制y方向
+            for (var j=0;j<this.numx;j++){
+                this.ctx.beginPath();
+                this.ctx.moveTo(j*this.space-0.5,0);
+                this.ctx.lineTo(j*this.space-0.5,this.canvasH-0.5);
+                this.ctx.strokeStyle="#ddd";
+                this.ctx.stroke();
+            }
+        };
+        //绘制坐标轴
+        LineChart.prototype.coord=function(){
+            //绘制x轴
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.space,this.canvasH-this.space);
+            this.ctx.lineTo(this.canvasW-this.space,this.canvasH-this.space);
+            this.ctx.lineTo(this.canvasW-this.space-10,this.canvasH-this.space-5);
+            this.ctx.lineTo(this.canvasW-this.space-10,this.canvasH-this.space+5);
+            this.ctx.lineTo(this.canvasW-this.space,this.canvasH-this.space);
+
+            //绘制y轴
+            this.ctx.moveTo(this.space,this.canvasH-this.space);
+            this.ctx.lineTo(this.space,this.space);
+            this.ctx.lineTo(this.space+5,this.space+10);
+            this.ctx.lineTo(this.space-5,this.space+10);
+            this.ctx.lineTo(this.space,this.space);
+            this.ctx.fill();
+            this.ctx.strokeStyle='#000';
+            this.ctx.stroke();
+        };
+        //坐标转换
+        LineChart.prototype.transformxy=function (data) {
+            var that=this;
+            console.log(that);
+            var prex=that.space;
+            var prey=that.canvasH-that.space;
+            data.forEach(function (item,i) {
+                that.ctx.beginPath();
+                that.ctx.moveTo(prex,prey);
+                var cx=item.x+that.space;
+                var cy=that.canvasH-item.y-that.space;
+                that.ctx.lineTo(cx,cy);
+                that.ctx.strokeStyle="red";
+                that.ctx.stroke();
+                that.ctx.beginPath();
+                that.ctx.arc(cx,cy,3,0,2*Math.PI);
+                that.ctx.fill();
+                prex=cx;
+                prey=cy;
+            });
+
+        };
+        //创建对象
+        var char=new LineChart();
+        //初始化
+        char.init(data);
+    </script>
+</body>
+</html>
