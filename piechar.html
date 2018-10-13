@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>饼状图</title>
+    <style>
+        canvas{
+            display: block;
+            margin:100px auto;
+            border:1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <canvas width="600" height="400"></canvas>
+    <script>
+//        饼状图的数据
+        var data=[
+            {
+                num:5,
+                title:'标题1'
+            },
+            {
+                num:15,
+                title:'title2'
+            },
+            {
+                num:25,
+                title:'title3'
+            },
+            {
+                num:10,
+                title:'title4'
+            },
+            {
+                num:5,
+                title:'标题5'
+            }];
+//        创建构造函数
+        var Piechar=function (ctx) {
+            this.ctx=ctx||document.querySelector('canvas').getContext('2d');
+            this.canvasW=this.ctx.canvas.width;
+            this.canvasH=this.ctx.canvas.height;
+            this.cx=this.canvasW/2+50;
+            this.cy=this.canvasH/2;
+            this.radius=150;
+            this.outline=25;
+            this.line=this.radius+this.outline;
+            this.dataList=[];
+        };
+//        初始化
+        Piechar.prototype.init=function (data) {
+            this.transAng(data);
+            this.drawAng(data);
+        };
+//        获取随机颜色
+        Piechar.prototype.getColor=function () {
+            var r = Math.floor(Math.random()*256);
+            var g = Math.floor(Math.random()*256);
+            var b = Math.floor(Math.random()*256);
+            return 'rgb('+r+','+g+','+b+')';
+        };
+//        将数据转换成弧度
+        Piechar.prototype.transAng=function (data) {
+            var that=this;
+            var total=0;
+            data.forEach(function (item,i) {
+                total+=item.num;
+            });
+            data.forEach(function (item,i) {
+                that.dataList.push(item.num/total*Math.PI*2);
+            });
+            console.log(that.dataList);
+        };
+//        画图
+        Piechar.prototype.drawAng=function(data){
+            var that=this;
+            var prex=0;
+            this.dataList.forEach(function (item,i) {
+                var str2=data[i].title;
+
+//                画扇形
+                that.ctx.beginPath();
+                that.ctx.moveTo(that.cx,that.cy);
+                var nextx=item+prex;
+                that.ctx.arc(that.cx,that.cy,that.radius,prex,nextx);
+                var color=that.getColor();
+                that.ctx.fillStyle=color;
+                that.ctx.fill();
+//              画伸出去的那条线
+                that.ctx.beginPath();
+                var a=(prex+nextx)/2;
+                that.ctx.moveTo(that.cx,that.cy);
+                var outx=that.cx+that.line*Math.cos(a);
+                var outy=that.cy+that.line*Math.sin(a);
+                that.ctx.lineTo(outx,outy);
+                that.ctx.strokeStyle=color;
+//                写文字说明
+                that.drawText(outx,outy,data,color,i);
+
+                that.ctx.stroke();
+                prex=nextx;
+                that.drawTitle(str2,color,i);
+            });
+        };
+//      写文字说明
+        Piechar.prototype.drawText=function (outx,outy,data,color,i) {
+            this.ctx.font = "14px Arial";
+            this.ctx.textBaseline='bottom';
+            var str=data[i].title+'  '+data[i].num+'人';
+
+            var textW=this.ctx.measureText(str).width;
+
+            if (outx>=this.cx){
+                this.ctx.textAlign='left';
+                this.ctx.lineTo(outx+textW+10,outy);
+                this.ctx.fillText(str,outx+10,outy);
+            }else{
+                this.ctx.textAlign='right';
+                this.ctx.lineTo(outx-textW-10,outy);
+                this.ctx.fillText(str,outx-10,outy);
+            }
+        };
+        //绘制标题
+        Piechar.prototype.drawTitle=function (str2,color,i) {
+//            小方块
+            var space=10;
+            var recH=10;
+            var recW=16;
+            this.ctx.beginPath();
+            this.ctx.rect(space,space+(space+recH)*i,recW,recH);
+            this.ctx.fillStyle=color;
+            this.ctx.fill();
+//            标题
+            this.ctx.beginPath();
+            this.ctx.textBaseline='bottom';
+            this.ctx.textAlign='left';
+            this.ctx.fillText(str2,2*space+recW,3+(space+recH)*(i+1));
+
+        };
+        var piechar=new Piechar();
+        piechar.init(data);
+    </script>
+</body>
+</html>
